@@ -38,9 +38,11 @@ import com.example.yukunlin.physiotherapydevice.module.Device;
 import com.example.yukunlin.physiotherapydevice.utils.DeviceDao;
 import com.example.yukunlin.physiotherapydevice.utils.DeviceDaoImpl;
 import com.inuker.bluetooth.library.BluetoothClient;
+import com.inuker.bluetooth.library.MysearchDivce.MySearchDivce;
 import com.inuker.bluetooth.library.search.SearchRequest;
 import com.inuker.bluetooth.library.search.SearchResult;
 import com.inuker.bluetooth.library.search.response.SearchResponse;
+import com.inuker.bluetooth.library.utils.L;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -102,7 +104,6 @@ public class DeviceActivity extends BaseActivity
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE_PHONE_STATUS);
         }
     }
-
 
     /**
      * 打开蓝牙
@@ -185,7 +186,6 @@ public class DeviceActivity extends BaseActivity
     protected void onResume() {
         mClient = new BluetoothClient(DeviceActivity.this);
         super.onResume();
-
     }
 
     private void initView() {
@@ -214,6 +214,7 @@ public class DeviceActivity extends BaseActivity
         recyclerView.setAdapter(adapter);
         adapter.setData(deviceList);
         adapter.notifyDataSetChanged();
+
         adapter.setOnItemClickListener(new DeviceRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClickListener(Device device, int position) {
@@ -288,7 +289,10 @@ public class DeviceActivity extends BaseActivity
                     public void onClick(DialogInterface dialogInterface, int which) {
                         switch (which) {
                             case 0:
-                                startSearchDevice("SmartFootbath");
+                               // startSearchDevice("SmartFootbath");
+                                //这里搜索设备
+                                List<Device> shebeijieguo =   MySearchDivce.startSearchDevice(DeviceActivity.this);
+                                L.e("搜索结果 "+shebeijieguo.size());
                                 break;
                             case 1:
                                 if (ActivityCompat.checkSelfPermission(DeviceActivity.this, Manifest.permission.CAMERA)
@@ -358,35 +362,38 @@ public class DeviceActivity extends BaseActivity
             @Override
             public void onDeviceFounded(SearchResult device) {
 
-            //    if (device.getName().equals(result)) {
-                    Device newDevice = new Device();
-                    newDevice.setName(device.getName());
-                    newDevice.setMacAddress(device.getAddress());
+                //    if (device.getName().equals(result)) {
+                Device newDevice = new Device();
+                //获取设备名字
+                newDevice.setName(device.getName());
+                //获取设备 MAC 地址
+                newDevice.setMacAddress(device.getAddress());
 //                    newDevice.setCharacteristicUuid("0000ffe1-0000-1000-8000-00805f9b34fb");
 //                    newDevice.setServiceUuid("0000ffe0-0000-1000-8000-00805f9b34fb");
-                    newDevice.setId(UUID.randomUUID().toString());
-                    deviceList.add(newDevice);
+                newDevice.setId(UUID.randomUUID().toString());
+                deviceList.add(newDevice);
 
-                    AddDeviceFragment fragment = new AddDeviceFragment();
-                    fragment.setData(deviceList);
-                    fragment.setOnSaveListener(new AddDeviceFragment.OnSaveListener() {
-                        @Override
-                        public void onSave() {
-                            deviceList.clear();
-                            try {
-                                for (int i = 0; i < deviceDao.getAllDevice().size(); i++) {
-                                    deviceList.add(deviceDao.getAllDevice().get(i));
-                                }
-                                adapter.notifyDataSetChanged();
-                            } catch (SQLException e) {
-                                e.printStackTrace();
+/*
+               // AddDeviceFragment fragment = new AddDeviceFragment();
+                fragment.setData(deviceList);
+                fragment.setOnSaveListener(new AddDeviceFragment.OnSaveListener() {
+                    @Override
+                    public void onSave() {
+                        deviceList.clear();
+                        try {
+                            for (int i = 0; i < deviceDao.getAllDevice().size(); i++) {
+                                deviceList.add(deviceDao.getAllDevice().get(i));
                             }
+                            adapter.notifyDataSetChanged();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    fragment.show(getSupportFragmentManager(), "dialogFragment");
-                    progressDialog.dismiss();
-                    mClient.stopSearch();
-           //     }
+                    }
+                });
+                fragment.show(getSupportFragmentManager(), "dialogFragment");*/
+                progressDialog.dismiss();
+                mClient.stopSearch();
+                //     }
             }
 
             @Override
